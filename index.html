@@ -51,32 +51,120 @@
 </div>
 <script>
 function openGame(url) {
+  // Must be user-initiated
   const win = window.open('about:blank', '_blank');
   if (!win) {
     alert('Please allow popups to play the game.');
     return;
   }
 
+  // Convert relative path → absolute URL
+  const fullUrl = new URL(url, window.location.href).href;
+
+  win.document.open();
   win.document.write(`
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <title>Game</title>
-      <style>
-        html, body {
-          margin: 0;
-          padding: 0;
-          width: 100%;
-          height: 100%;
-          overflow: hidden;
-          background: black;
-        }
-        iframe {
-          width: 100%;
-          height: 100%;
-          border: none;
-        }
-      </style>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+
+  <!-- 🔒 Cloaked tab title -->
+  <title>Google Docs</title>
+
+  <!-- 🔒 Cloaked favicon -->
+  <link rel="icon" href="https://www.google.com/favicon.ico">
+
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      background: black;
+      overflow: hidden;
+    }
+
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    /* Optional top bar */
+    #topbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 40px;
+      background: #111;
+      color: white;
+      font-family: Arial, sans-serif;
+      display: flex;
+      align-items: center;
+      padding: 0 10px;
+      z-index: 9999;
+    }
+
+    #topbar button {
+      margin-right: 10px;
+      padding: 5px 10px;
+      cursor: pointer;
+    }
+
+    #gameframe {
+      position: absolute;
+      top: 40px;
+      left: 0;
+      width: 100%;
+      height: calc(100% - 40px);
+    }
+  </style>
+</head>
+<body>
+
+  <div id="topbar">
+    <button onclick="toggleFullscreen()">Fullscreen</button>
+    <button onclick="panic()">Panic</button>
+    <span>Google Docs</span>
+  </div>
+
+  <iframe id="gameframe" src="${fullUrl}" allowfullscreen></iframe>
+
+  <script>
+    function toggleFullscreen() {
+      const iframe = document.getElementById('gameframe');
+      if (iframe.requestFullscreen) iframe.requestFullscreen();
+    }
+
+    // Panic button (instant close)
+    function panic() {
+      window.location.replace('https://classroom.google.com');
+    }
+
+    // Panic key (ESC)
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        panic();
+      }
+    });
+  <\/script>
+
+</body>
+</html>
+  `);
+  win.document.close();
+}
+
+// Hook buttons
+document.querySelectorAll('.play-btn').forEach(btn => {
+  btn.addEventListener('click', e => {
+    e.preventDefault();
+    openGame(btn.getAttribute('href'));
+  });
+});
+</script>
+
     </head>
     <body>
       <iframe src="${url}" allowfullscreen></iframe>
