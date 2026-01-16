@@ -26,29 +26,74 @@
   <div class="game-card">
     <img src="games/game1/assets/thumb.png" alt="Game 1 Thumbnail">
     <h3>Game 1</h3>
-    <a href="games/game1/index.html" target="_blank">Play</a>
+    <a href="games/game1/index.html" class="play-btn">Play</a>
   </div>
   <div class="game-card">
     <img src="games/cellmates-master/thumb.png" alt="Game 2 Thumbnail">
     <h3>""</h3>
-    <a href="games/cellmates/index.html" target="_blank">Play</a>
+    <a href="games/cellmates/index.html" class="play-btn">Play</a>
   </div>
   <div class="game-card">
     <img src="games/cellmates-master/thumb.png" alt="Game 2 Thumbnail">
     <h3>""</h3>
-    <a href="games/breakout/index.html" target="_blank">Play</a>
+    <a href="games/breakout/index.html" class="play-btn">Play</a>
   </div>
   <div class="game-card">
     <img src="games/cellmates-master/thumb.png" alt="Game 2 Thumbnail">
     <h3>""</h3>
-    <a href="games/spaceCompany/index.html" target="_blank">Play</a>
+    <a href="games/spaceCompany/index.html" class="play-btn">Play</a>
   </div>
   <div class="game-card">
     <img src="games/cellmates-master/thumb.png" alt="Game 2 Thumbnail">
     <h3>""</h3>
-    <a href="games/2048/index.html" target="_blank">Play</a>
+    <a href="games/2048/index.html" class="play-btn">Play</a>
   </div>
 </div>
+<script>
+function openGame(url) {
+  const win = window.open('about:blank', '_blank');
+  if (!win) {
+    alert('Please allow popups to play the game.');
+    return;
+  }
 
+  win.document.write(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Game</title>
+      <style>
+        html, body {
+          margin: 0;
+          padding: 0;
+          width: 100%;
+          height: 100%;
+          overflow: hidden;
+          background: black;
+        }
+        iframe {
+          width: 100%;
+          height: 100%;
+          border: none;
+        }
+      </style>
+    </head>
+    <body>
+      <iframe src="${url}" allowfullscreen></iframe>
+    </body>
+    </html>
+  `);
+
+  win.document.close();
+}
+
+// Automatically convert all play buttons
+document.querySelectorAll('.play-btn').forEach(btn => {
+  btn.addEventListener('click', e => {
+    e.preventDefault();
+    openGame(btn.getAttribute('href'));
+  });
+});
+</script>
 </body>
 </html>
