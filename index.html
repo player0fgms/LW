@@ -51,14 +51,12 @@
 </div>
 <script>
 function openGame(url) {
-  // Must be user-initiated
   const win = window.open('about:blank', '_blank');
   if (!win) {
     alert('Please allow popups to play the game.');
     return;
   }
 
-  // Convert relative path → absolute URL
   const fullUrl = new URL(url, window.location.href).href;
 
   win.document.open();
@@ -67,11 +65,7 @@ function openGame(url) {
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-
-  <!-- 🔒 Cloaked tab title -->
   <title>Google Docs</title>
-
-  <!-- 🔒 Cloaked favicon -->
   <link rel="icon" href="https://www.google.com/favicon.ico">
 
   <style>
@@ -84,13 +78,6 @@ function openGame(url) {
       overflow: hidden;
     }
 
-    iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-    }
-
-    /* Optional top bar */
     #topbar {
       position: fixed;
       top: 0;
@@ -112,12 +99,13 @@ function openGame(url) {
       cursor: pointer;
     }
 
-    #gameframe {
+    iframe {
       position: absolute;
       top: 40px;
       left: 0;
       width: 100%;
       height: calc(100% - 40px);
+      border: none;
     }
   </style>
 </head>
@@ -137,16 +125,12 @@ function openGame(url) {
       if (iframe.requestFullscreen) iframe.requestFullscreen();
     }
 
-    // Panic button (instant close)
     function panic() {
       window.location.replace('https://classroom.google.com');
     }
 
-    // Panic key (ESC)
     document.addEventListener('keydown', e => {
-      if (e.key === 'Escape') {
-        panic();
-      }
+      if (e.key === 'Escape') panic();
     });
   <\/script>
 
@@ -156,7 +140,6 @@ function openGame(url) {
   win.document.close();
 }
 
-// Hook buttons
 document.querySelectorAll('.play-btn').forEach(btn => {
   btn.addEventListener('click', e => {
     e.preventDefault();
@@ -165,23 +148,5 @@ document.querySelectorAll('.play-btn').forEach(btn => {
 });
 </script>
 
-    </head>
-    <body>
-      <iframe src="${url}" allowfullscreen></iframe>
-    </body>
-    </html>
-  `);
-
-  win.document.close();
-}
-
-// Automatically convert all play buttons
-document.querySelectorAll('.play-btn').forEach(btn => {
-  btn.addEventListener('click', e => {
-    e.preventDefault();
-    openGame(btn.getAttribute('href'));
-  });
-});
-</script>
 </body>
 </html>
