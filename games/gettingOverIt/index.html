@@ -8,6 +8,7 @@
     <title>Unity WebGL Player | Getting Over It</title>
     <link rel="shortcut icon" href="TemplateData/favicon.ico">
     <link rel="stylesheet" href="TemplateData/style.css">
+
     <style>
         html,
         body {
@@ -24,14 +25,20 @@
             width: 100%;
             height: 100%;
             display: block;
+            cursor: none; /* hide cursor */
         }
     </style>
 </head>
 
 <body>
-    <div id="loading-text" style="color: white; font-size: 48px; font-family: cursive; text-align: center; margin-top: 20px;"> LOADING... </div>
+    <div id="loading-text"
+        style="color: white; font-size: 48px; font-family: cursive; text-align: center; margin-top: 20px;">
+        LOADING...
+    </div>
+
     <div id="unity-container" class="unity-desktop">
         <canvas id="unity-canvas" tabindex="-1"></canvas>
+
         <div id="unity-loading-bar">
             <div id="unity-logo"></div>
             <div id="unity-progress-bar-empty">
@@ -39,6 +46,7 @@
             </div>
         </div>
     </div>
+
     <script>
         const loadingText = document.querySelector("#loading-text");
         let totalBytes = 0;
@@ -61,20 +69,25 @@
             const reader = response.body.getReader();
             let chunks = [];
             let received = 0;
+
             while (true) {
-                const {
-                    done,
-                    value
-                } = await reader.read();
+                const { done, value } = await reader.read();
                 if (done) break;
+
                 received += value.length;
                 loadedBytes += value.length;
                 chunks.push(value);
+
                 const doneText = formatSize(loadedBytes);
                 const totalText = formatSize(totalBytes);
-                const percent = totalBytes > 0 ? ((loadedBytes / totalBytes) * 100).toFixed(1) : "?";
-                loadingText.textContent = `LOADING... ${doneText} / ${totalText} (${percent}%)`;
+                const percent = totalBytes > 0
+                    ? ((loadedBytes / totalBytes) * 100).toFixed(1)
+                    : "?";
+
+                loadingText.textContent =
+                    `LOADING... ${doneText} / ${totalText} (${percent}%)`;
             }
+
             let fullBuffer = new Uint8Array(received);
             let offset = 0;
             for (let chunk of chunks) {
@@ -83,6 +96,7 @@
             }
             return fullBuffer.buffer;
         }
+
         async function mergeFiles(parts) {
             const buffers = await Promise.all(parts.map(fetchWithProgress));
             return URL.createObjectURL(new Blob(buffers));
@@ -95,27 +109,47 @@
             }
             return parts;
         }
+
+        // ===== POINTER LOCK HELPERS =====
+        function enablePointerLock(canvas) {
+            canvas.addEventListener("click", () => {
+                if (document.pointerLockElement !== canvas) {
+                    canvas.requestPointerLock();
+                }
+            });
+        }
+
+        document.addEventListener("pointerlockchange", () => {
+            const canvas = document.getElementById("unity-canvas");
+            if (document.pointerLockElement === canvas) {
+                console.log("Pointer locked");
+            } else {
+                console.log("Pointer unlocked");
+            }
+        });
+        // ================================
+
         (async () => {
             const dataParts = getParts("Build/GettingOverIt.data", 32);
             const wasmParts = getParts("Build/GettingOverIt.wasm", 2);
-            const allParts = [...dataParts, ...wasmParts];
+
             totalBytes = 691732588;
+
             const [dataUrl, wasmUrl] = await Promise.all([
                 mergeFiles(dataParts),
                 mergeFiles(wasmParts)
             ]);
+
             var container = document.querySelector("#unity-container");
             var canvas = document.querySelector("#unity-canvas");
             var loadingBar = document.querySelector("#unity-loading-bar");
             var progressBarFull = document.querySelector("#unity-progress-bar-full");
-            var warningBanner = document.querySelector("#unity-warning");
 
-            function unityShowBanner(msg, type) {
-
-            }
+            function unityShowBanner(msg, type) { }
 
             var buildUrl = "Build";
             var loaderUrl = buildUrl + "/GettingOverIt.loader.js";
+
             var config = {
                 dataUrl: dataUrl,
                 frameworkUrl: buildUrl + "/GettingOverIt.framework.js",
@@ -128,17 +162,15 @@
             };
 
             if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+                var meta = document.createElement("meta");
+                meta.name = "viewport";
+                meta.content =
+                    "width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes";
+                document.head.appendChild(meta);
 
-                var meta = document.createElement('meta');
-                meta.name = 'viewport';
-                meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
-                document.getElementsByTagName('head')[0].appendChild(meta);
                 container.className = "unity-mobile";
                 canvas.className = "unity-mobile";
-
             } else {
-                const canvas = document.querySelector("canvas");
-
                 function resizeCanvas() {
                     canvas.width = window.innerWidth;
                     canvas.height = window.innerHeight;
@@ -160,6 +192,17 @@
                 }).then((unityInstance) => {
                     loadingBar.style.display = "none";
                     loadingText.remove();
+
+                    // ENABLE CURSOR LOCK AFTER LOAD
+                    enablePointerLock(canvas);
+
+                    // Auto-lock on first click anywhere
+                    document.addEventListener("click", () => {
+                        if (document.pointerLockElement !== canvas) {
+                            canvas.requestPointerLock();
+                        }
+                    }, { once: true });
+
                 }).catch((message) => {
                     alert(message);
                 });
