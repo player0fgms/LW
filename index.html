@@ -356,7 +356,7 @@
     <a href="games/geometryDashLite/index.html" class="play-btn">Play</a>
   </div>
 </div>
-<script>
+<!-- <script>
 function openGame(url) {
   const win = window.open('about:blank', '_blank');
   if (!win) {
@@ -372,7 +372,7 @@ function openGame(url) {
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>https://studentontask.com/</title>
+  <title>about:blank</title>
 
   <style>
     html, body {
@@ -452,7 +452,37 @@ document.querySelectorAll('.play-btn').forEach(btn => {
     openGame(btn.getAttribute('href'));
   });
 });
-</script>
+</script> -->
+<script>
+  function openGame(url) {
+    const newWin = window.open("about:blank", "_blank");
+    if (!newWin) {
+      alert("Popup blocked! Please allow popups for this site.");
+      return;
+    }
 
+    // Inject an iframe with the game
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8">
+        <title>Game</title>
+        <style>
+          body { margin: 0; background: black; }
+          iframe { border: none; width: 100vw; height: 100vh; }
+        </style>
+      </head>
+      <body>
+        <iframe src="${url}" allowfullscreen></iframe>
+      </body>
+      </html>
+    `;
+
+    newWin.document.open();
+    newWin.document.write(htmlContent);
+    newWin.document.close();
+  }
+</script>
 </body>
 </html>
